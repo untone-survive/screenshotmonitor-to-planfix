@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+    build:
+        desc: Build the app
+        cmds:
+        - GOFLAGS=-mod=mod GOOS=linux GOARCH=amd64 go build -o bin/sm-planfix-linux-amd64

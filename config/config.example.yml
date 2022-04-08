@@ -1,0 +1,20 @@
+planfix:
+  account: account-name
+  api_key: aaa111222eee333444bbbccc555666dd
+  api_secret: aaa111222eee333444bbbccc555666dd
+  user: username
+  password: userpassword
+
+dropbox:
+  token: 01234567891AAAAAAAFMT-JlVatWsmjNF_6-8JzJu7Mg6-Ti82ddtGvDu6li8U_C # dropbox app token
+
+bitly:
+  token: 12345678937a5a7ae0ecc498fa6b28636c3eabcd # bitly token
+
+sm:
+  token: 1234ab567a8bc9055dccc27f445a14c478f00 # screenshotmonitor.com token
+
+# Sm user id -> Planfix user id
+users:
+  25470: 27585
+  94314: 32938

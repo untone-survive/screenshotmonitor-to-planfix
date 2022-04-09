@@ -45,7 +45,7 @@ func (c *Config) processError(err error) {
 }
 
 func (c *Config) readYmlConfig() {
-	err := cleanenv.ReadConfig("config/config.yml", c)
+	err := cleanenv.ReadConfig("./config/config.yml", c)
 	if err != nil {
 		c.processError(err)
 	}

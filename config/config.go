@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
@@ -16,6 +15,7 @@ type Config struct {
 	ScreenshotMonitor ScreenshotMonitor `yaml:"sm"`
 	Bitly             Bitly             `yaml:"bitly"`
 	Users             map[int]int       `yaml:"users"`
+	Args              Args              `yaml:"-"`
 }
 
 type Planfix struct {
@@ -42,6 +42,8 @@ type Bitly struct {
 // Args command-line parameters
 type Args struct {
 	ConfigPath string
+	StartDate  string
+	EndDate    string
 }
 
 func (c *Config) processError(err error) {
@@ -50,32 +52,16 @@ func (c *Config) processError(err error) {
 }
 
 func (c *Config) readYmlConfig() {
-	var cfg Config
+	flag.StringVar(&c.Args.ConfigPath, "config", "config.yml", "Path to config file")
+	flag.StringVar(&c.Args.StartDate, "start", "", "Date to start from (YYYY-MM-DD). Defaults to yesterday.")
+	flag.StringVar(&c.Args.EndDate, "end", "", "End date (YYYY-MM-DD) non-inclusive. Defaults to today.")
+	flag.Parse()
 
-	args := ProcessArgs(&cfg)
-	err := cleanenv.ReadConfig(args.ConfigPath, c)
+	log.Println("Using config file", c.Args.ConfigPath)
+	err := cleanenv.ReadConfig(c.Args.ConfigPath, c)
 	if err != nil {
 		c.processError(err)
 	}
-}
-
-// ProcessArgs processes and handles CLI arguments
-func ProcessArgs(cfg interface{}) Args {
-	var a Args
-
-	f := flag.NewFlagSet("parameters", 1)
-	f.StringVar(&a.ConfigPath, "c", "config.yml", "Path to configuration file")
-
-	fu := f.Usage
-	f.Usage = func() {
-		fu()
-		envHelp, _ := cleanenv.GetDescription(cfg, nil)
-		fmt.Fprintln(f.Output())
-		fmt.Fprintln(f.Output(), envHelp)
-	}
-
-	f.Parse(os.Args[1:])
-	return a
 }
 
 func init() {

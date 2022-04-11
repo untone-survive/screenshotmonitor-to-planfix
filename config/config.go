@@ -1,6 +1,8 @@
 package config
 
 import (
+	"flag"
+	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
@@ -26,9 +28,7 @@ type Planfix struct {
 }
 
 type Dropbox struct {
-	ClientId     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`
-	Token        string `yaml:"token"`
+	Token string `yaml:"token"`
 }
 
 type ScreenshotMonitor struct {
@@ -39,16 +39,43 @@ type Bitly struct {
 	Token string `yaml:"token"`
 }
 
+// Args command-line parameters
+type Args struct {
+	ConfigPath string
+}
+
 func (c *Config) processError(err error) {
 	log.Println(err)
 	os.Exit(1)
 }
 
 func (c *Config) readYmlConfig() {
-	err := cleanenv.ReadConfig("./config/config.yml", c)
+	var cfg Config
+
+	args := ProcessArgs(&cfg)
+	err := cleanenv.ReadConfig(args.ConfigPath, c)
 	if err != nil {
 		c.processError(err)
 	}
+}
+
+// ProcessArgs processes and handles CLI arguments
+func ProcessArgs(cfg interface{}) Args {
+	var a Args
+
+	f := flag.NewFlagSet("parameters", 1)
+	f.StringVar(&a.ConfigPath, "c", "config.yml", "Path to configuration file")
+
+	fu := f.Usage
+	f.Usage = func() {
+		fu()
+		envHelp, _ := cleanenv.GetDescription(cfg, nil)
+		fmt.Fprintln(f.Output())
+		fmt.Fprintln(f.Output(), envHelp)
+	}
+
+	f.Parse(os.Args[1:])
+	return a
 }
 
 func init() {

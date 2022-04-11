@@ -15,7 +15,12 @@ import (
 	"time"
 )
 
+const (
+	dateFormat = "2006-01-02"
+)
+
 func main() {
+	var err error
 	bApi := bitly.New(config.GetConfig().Bitly.Token)
 	smApi := sm.New(config.GetConfig().ScreenshotMonitor.Token)
 	db := dropbox.New(dropbox.NewConfig(config.GetConfig().Dropbox.Token))
@@ -29,17 +34,41 @@ func main() {
 		pfConfig.User,
 		pfConfig.Password,
 	)
-
 	now := time.Now()
-	yesterday := now.Add(-24 * time.Hour)
-	yesterday = time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, time.Local)
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).Add(-1 * time.Second)
+	var startDate, endDate time.Time
 
-	for smId, _ := range userRelations {
+	if config.GetConfig().Args.StartDate == "" {
+		log.Println("No start date provided, using default start date")
+		startDate = now.Add(-24 * time.Hour)
+		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.Local)
+	} else {
+		log.Println("Using provided start date:", config.GetConfig().Args.StartDate)
+		startDate, err = time.Parse(dateFormat, config.GetConfig().Args.StartDate)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	if config.GetConfig().Args.EndDate == "" {
+		log.Println("No end date provided, using default start date")
+		endDate = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	} else {
+		log.Println("Using provided end date:", config.GetConfig().Args.EndDate)
+		endDate, err = time.Parse(dateFormat, config.GetConfig().Args.EndDate)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	endDate = endDate.Add(-1 * time.Millisecond)
+
+	for smId := range userRelations {
 
 		log.Println("Activities of user #", smId)
+		log.Println("Start date", startDate)
+		log.Println("End date", endDate)
 
-		actResp, err := smApi.GetActivities(smApi.NewRequestActivityForUser(smId, yesterday))
+		actResp, err := smApi.GetActivities(smApi.NewRequestActivityForUser(smId, startDate, endDate))
 
 		if err != nil {
 			printError(err)
@@ -51,7 +80,7 @@ func main() {
 			log.Println("Started", activity.FromFormatted(), activity.FromFormattedTime())
 			log.Println("Finished", activity.ToFormatted(), activity.ToFormattedTime())
 
-			if activity.GetFrom().Before(yesterday) || activity.GetTo().After(today) {
+			if activity.GetFrom().Before(startDate) || activity.GetTo().After(endDate) {
 				log.Println("Wrong time range. Skipping activity.", "\n", "--------------")
 				continue
 			}
@@ -64,7 +93,7 @@ func main() {
 
 			dirPath := SanitizeFilename(
 				`/` +
-					activity.GetFrom().Format("2006-01-02") +
+					activity.GetFrom().Format(dateFormat) +
 					`/` +
 					activity.Note +
 					`/` +

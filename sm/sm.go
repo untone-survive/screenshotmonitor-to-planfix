@@ -106,13 +106,12 @@ func (s *SM) request(method string, requestStruct, responseStruct interface{}) e
 	return nil
 }
 
-func (s *SM) NewRequestActivityForUser(userId int, date time.Time) GetActivitiesRequest {
+func (s *SM) NewRequestActivityForUser(userId int, startDate, endDate time.Time) GetActivitiesRequest {
 	return GetActivitiesRequest{
 		{
 			Employee: userId,
-			From:     startOfDay(date).Unix(),
-			//To:       endOfDay(date).Unix(),
-			To: time.Now().Unix(),
+			From:     startDate.Unix(),
+			To:       endDate.Unix(),
 		},
 	}
 }
@@ -125,11 +124,6 @@ func (s *SM) NewRequestScreenshotsArgs(activityId string) GetScreenshotsRequest 
 	return GetScreenshotsRequest{
 		activityUuid,
 	}
-}
-
-func startOfDay(t time.Time) time.Time {
-	year, month, day := t.Date()
-	return time.Date(year, month, day, 0, 0, 0, 0, t.Location())
 }
 
 func (a GetActivityResponseItem) GetFrom() time.Time {

@@ -95,11 +95,7 @@ func main() {
 				`/` +
 					activity.GetFrom().Format(dateFormat) +
 					`/` +
-					activity.Note +
-					`/` +
-					activity.FromFormattedTime() +
-					" - " +
-					activity.ToFormattedTime(),
+					activity.Note,
 			)
 
 			if uploadScreenshotsToDropbox(getScreenshots(smApi, activity), dirPath, db) > 0 {
@@ -247,7 +243,7 @@ func uploadScreenshotsToDropbox(screenshots *sm.GetScreenshotsResponse, dirPath 
 			continue
 		}
 
-		filePath := dirPath + `/` + strconv.Itoa(screenshot.Id) + ".jpg"
+		filePath := dirPath + `/` + time.Unix(screenshot.Taken, 0).Format("15-04 ") + strconv.Itoa(screenshot.Id) + ".jpg"
 
 		log.Println("Downloading... ")
 		sFile, _ := http.Get(screenshot.Url)

@@ -63,7 +63,7 @@ type GetScreenshotResponseItem struct {
 	Height        int    `json:"height"`
 	Url           string `json:"url"`
 	ThumbUrl      string `json:"thumbUrl"`
-	Taken         int    `json:"taken"`
+	Taken         int64  `json:"taken"`
 	ActivityLevel int    `json:"activityLevel"`
 	Applications  []struct {
 		FromScreen      bool   `json:"fromScreen"`

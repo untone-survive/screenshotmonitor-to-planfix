@@ -87,6 +87,7 @@ func (b *Bitly) Shorten(url Url, domain ...string) (Response, error) {
 
 	httpClient := http.Client{}
 	req, _ := http.NewRequest("POST", API_URL, strings.NewReader(string(jsonBytes)))
+	req.Header.Add("User-Agent", "elustro-sm-planfix-bot/1.0")
 	req.Header.Add("Authorization", "Bearer "+b.Token)
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 

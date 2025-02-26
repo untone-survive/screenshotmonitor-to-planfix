@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
-	planfix2 "github.com/popstas/planfix-go/planfix"
-	"github.com/tj/go-dropbox"
 	"log"
 	"net/http"
 	"regexp"
 	"screenshotmonitor-to-planfix/bitly"
 	"screenshotmonitor-to-planfix/config"
+	"screenshotmonitor-to-planfix/links"
 	"screenshotmonitor-to-planfix/sm"
 	"strconv"
 	"strings"
 	"time"
+
+	planfix2 "github.com/popstas/planfix-go/planfix"
+	"github.com/tj/go-dropbox"
 )
 
 const (
@@ -22,6 +24,7 @@ const (
 func main() {
 	var err error
 	bApi := bitly.New(config.GetConfig().Bitly.Token)
+	linksApi := links.New(config.GetConfig().Links.Code, config.GetConfig().Links.ApiUrl)
 	smApi := sm.New(config.GetConfig().ScreenshotMonitor.Token)
 	db := dropbox.New(dropbox.NewConfig(config.GetConfig().Dropbox.Token))
 	userRelations := getUsers()
@@ -87,7 +90,7 @@ func main() {
 
 			getRefId(activity)
 			if activity.PlanfixId == 0 {
-				log.Println("not fount planfix task id in activity `note` field. skipping activity.")
+				log.Println("not found planfix task id in activity `note` field. skipping activity.")
 				continue
 			}
 
@@ -103,9 +106,18 @@ func main() {
 				activity.ScreenshotUrl = shareUrl
 
 				log.Println("Shortening link")
-				if shortenResp, err := bApi.Shorten(bitly.Url(shareUrl)); err != nil {
+				if shortenResp, err := bApi.Shorten(bitly.Url(shareUrl)); err == nil {
 					activity.ScreenshotUrl = shortenResp.Link
 					log.Println("Short URL:", activity.ScreenshotUrl)
+				} else {
+					log.Println("Error shortening URL:", err)
+					log.Println("Trying local shortener")
+					if linksResp, err := linksApi.Shorten(links.Url(shareUrl)); err == nil {
+						activity.ScreenshotUrl = linksResp.ShortURL
+						log.Println("Short URL:", activity.ScreenshotUrl)
+					} else {
+						log.Println("Error while using local shortening:", err)
+					}
 				}
 
 				if activity.ScreenshotUrl != "" {
@@ -232,7 +244,7 @@ func getDropboxFolderPath(db *dropbox.Client, dirPath string) string {
 	return shareUrl
 }
 
-//uploadScreenshotsToDropbox upload screenshots from SM to Dropbox and retrieve share link to folder
+// uploadScreenshotsToDropbox upload screenshots from SM to Dropbox and retrieve share link to folder
 func uploadScreenshotsToDropbox(screenshots *sm.GetScreenshotsResponse, dirPath string, db *dropbox.Client) int {
 	activeScreenshots := 0
 

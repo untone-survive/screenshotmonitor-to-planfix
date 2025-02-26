@@ -2,9 +2,10 @@ package config
 
 import (
 	"flag"
-	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
+
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 var conf Config
@@ -14,6 +15,7 @@ type Config struct {
 	Dropbox           Dropbox           `yaml:"dropbox"`
 	ScreenshotMonitor ScreenshotMonitor `yaml:"sm"`
 	Bitly             Bitly             `yaml:"bitly"`
+	Links             Links             `yaml:"links"`
 	Users             map[int]int       `yaml:"users"`
 	Args              Args              `yaml:"-"`
 }
@@ -37,6 +39,11 @@ type ScreenshotMonitor struct {
 
 type Bitly struct {
 	Token string `yaml:"token"`
+}
+
+type Links struct {
+	Code   string `yaml:"code"`
+	ApiUrl string `yaml:"api_url"`
 }
 
 // Args command-line parameters

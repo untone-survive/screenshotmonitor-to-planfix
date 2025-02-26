@@ -112,7 +112,7 @@ func main() {
 				} else {
 					log.Println("Error shortening URL:", err)
 					log.Println("Trying local shortener")
-					if linksResp, err := linksApi.Shorten(links.Url(shareUrl)); err == nil {
+					if linksResp, err := linksApi.Shorten(links.Url(shareUrl), "Dropbox - #"+strconv.Itoa(activity.PlanfixId)+" "+activity.Note); err == nil {
 						activity.ScreenshotUrl = linksResp.ShortURL
 						log.Println("Short URL:", activity.ScreenshotUrl)
 					} else {

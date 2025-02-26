@@ -29,7 +29,7 @@ type ShortenResponse struct {
 	Message    string  `json:"message"`
 	Title      string  `json:"title"`
 	ShortURL   string  `json:"shorturl"`
-	StatusCode int     `json:"statusCode"`
+	StatusCode string  `json:"statusCode"`
 }
 
 type URLInfo struct {
@@ -46,7 +46,7 @@ func New(code string, api_url string) *Links {
 	return &Links{Code: code, ApiUrl: api_url}
 }
 
-func (l *Links) Shorten(fullurl Url) (ShortenResponse, error) {
+func (l *Links) Shorten(fullurl Url, title string) (ShortenResponse, error) {
 	var linksResp ShortenResponse
 
 	r := ShortenRequest{Url: fullurl, Action: "shorturl", Signature: l.Code, Format: "json"}
@@ -57,6 +57,9 @@ func (l *Links) Shorten(fullurl Url) (ShortenResponse, error) {
 	queryParams.Set("action", r.Action)
 	queryParams.Set("signature", r.Signature)
 	queryParams.Set("format", r.Format)
+	if title != "" {
+		queryParams.Set("title", title)
+	}
 
 	// Create full URL
 	apiUrl := fmt.Sprintf("%s?%s", l.ApiUrl, queryParams.Encode())
@@ -74,6 +77,7 @@ func (l *Links) Shorten(fullurl Url) (ShortenResponse, error) {
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
+
 	stringData := string(data)
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		return linksResp, fmt.Errorf("[ERROR] status error: %v\n%q", resp.StatusCode, stringData)

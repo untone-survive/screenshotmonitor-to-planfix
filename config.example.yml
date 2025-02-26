@@ -4,6 +4,8 @@ planfix:
   api_secret: aaa111222eee333444bbbccc555666dd
   user: username
   password: userpassword
+  tokens:
+    - aaaaaaaaaa5df7055dcccccc445a14c478f14
 
 dropbox:
   token: 01234567891AAAAAAAFMT-JlVatWsmjNF_6-8JzJu7Mg6-Ti82ddtGvDu6li8U_C # dropbox app token
@@ -13,6 +15,11 @@ bitly:
 
 sm:
   token: 1234ab567a8bc9055dccc27f445a14c478f00 # screenshotmonitor.com token
+
+# use YOURLS to generate short links if bitly is not working
+links:
+  code: abcdef0123
+  api_url: https://example.com/yourls-api.php
 
 # Sm user id -> Planfix user id
 users:

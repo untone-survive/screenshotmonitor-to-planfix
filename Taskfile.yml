@@ -5,3 +5,7 @@ tasks:
         desc: Build the app
         cmds:
         - GOFLAGS=-mod=mod GOOS=linux GOARCH=amd64 go build -o bin/sm-planfix-linux-amd64
+    build-macos:
+        desc: Build the app for macOS (Apple Silicon)
+        cmds:
+        - GOFLAGS=-mod=mod GOOS=darwin GOARCH=arm64 go build -o bin/sm-planfix-macos-arm64

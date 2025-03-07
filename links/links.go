@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 type Links struct {
@@ -66,8 +65,9 @@ func (l *Links) Shorten(fullurl Url, title string) (ShortenResponse, error) {
 
 	// Create HTTP request
 	httpClient := http.Client{}
-	req, _ := http.NewRequest("POST", apiUrl, strings.NewReader(""))
+	req, _ := http.NewRequest("POST", apiUrl, nil)
 	req.Header.Add("User-Agent", "elustro-sm-planfix-bot/1.0")
+	req.Header.Set("Content-Length", "0") // Explicitly set Content-Length
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
